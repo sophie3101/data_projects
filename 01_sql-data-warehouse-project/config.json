@@ -1,0 +1,33 @@
+{
+  "raw_dataset": {
+    "src_link": "https://raw.githubusercontent.com/DataWithBaraa/sql-data-warehouse-project/main/datasets/",
+    "child_items": {
+      "source_erp": ["CUST_AZ12.csv", "LOC_A101.csv", "PX_CAT_G1V2.csv"],
+      "source_crm": ["cust_info.csv", "prd_info.csv", "sales_details.csv"]
+    },
+    "dest_folder": "data/raw_dataset"
+  },
+
+  "processed_dataset": {
+    "dest_folder": "data/processed_dataset",
+    "child_items": {
+      "source_erp": [
+        "customer_info.csv",
+        "customer_location.csv",
+        "product_categories.csv"
+      ],
+      "source_crm": [
+        "customer_order_info.csv",
+        "product_info.csv",
+        "sales_details.csv"
+      ]
+    }
+  },
+  "postgresql": {
+    "host": "localhost",
+    "port": "5432",
+    "username": "postgres",
+    "database_name": "sales_db",
+    "ddl": "data/sales_db_ddl.sql"
+  }
+}
