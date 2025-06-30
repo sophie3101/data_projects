@@ -1,32 +1,18 @@
-# ETL DEMO
+# ETL Demo: Data Warehousing & Analytics Pipeline
 
-This project demonstrates a comprehensive data warehousing and analytics solution, covering the entire process from building a data warehouse to generating actionable insights.
-
-The project is inspired by [DataWithBaraa’s](https://github.com/DataWithBaraa/sql-data-warehouse-project) SQL Data Warehouse Project.
+This project demonstrates an end-to-end data warehousing and analytics solution. It walks through the full ETL process—from ingesting raw data to transforming it using Python, loading it into a PostgreSQL database, and visualizing it with Tableau.
 
 ## Objective
 
-import data from two source system (ERP and CRM) provided a sCSV files. Cleanse and resllve data quality. Combine both sources into single, user friendly data model
-crm
-sales_details: transactional recors about sales and orers
-cust_info: customer information
-prd_info: current and history product information
+1. **Data Ingestion**: Import CSV data from ERP and CRM source systems. Sample datasets can be found at [link](https://github.com/DataWithBaraa/sql-data-warehouse-project/tree/main/datasets).
 
-erp: extra details about the customer
+2. **Data Cleaning**: Execute data cleansing operations, including but not limited to, the resolution of null values and empty string inconsistencies.
 
-Repository Structure
+3. **Data Loading**: Transfer the prepared data into a PostgreSQL database
 
-## Data Source Overview
+4. **Data Analytics**: Explore data and prepare analyzed data for reporting
 
-CRM Data
-sales_details: Transactional records about sales and orders.
-
-cust_info: Customer information.
-
-prd_info: Current and historical product information.
-
-ERP Data
-Additional details about customers to enrich CRM data.
+5. **Data Visualization**: Visualize the data using Tableau
 
 ## Repository Structure
 
@@ -39,9 +25,9 @@ project-root/
 │
 ├── data/ # Raw and processed CSV files
 │
-├── tests/ # Unit and integration tests for ETL modules
-│
 ├── etl.log # Log file generated during ETL runs
+|
+├── requirements.txt # listing required packages to run the pipeline
 │
 └── README.md # Project overview and instructions
 ```
@@ -50,22 +36,32 @@ project-root/
 
 Clone the repository:
 
-bash
-Copy
-Edit
+```
 git clone https://github.com/yourusername/etl-demo.git
-Prepare your CSV source files and place them in the data/ folder.
+```
 
 Run the ETL pipeline:
 
-css
-Copy
-Edit
+```
 python src/main.py
-Check etl.log for detailed logs.
+```
+
+Check `etl.log` for detailed logs.
 
 ## Logging
 
-Info level and above are logged to etl.log.
+Info level and above are logged to `etl.log`.
 
 Debug and above are output to the console for real-time monitoring.
+
+## Data Analytics
+
+SQL queries are stored in [doc](doc)
+
+- [create_views.sql](doc/create_views.sql) : SQL queries for creating view
+- [data_exploration.sql](doc/data_exploration.sql): SQL queries for data exloraton
+- [reports_analytics.sql](doc/reports_analytic.sql): SQL queries for group data into categories for insights
+
+## Visualization
+
+The final dashboard showcasing the sales data can be viewed here: [link](https://public.tableau.com/views/Sales_dashboard_17513199682000/Dashboard1?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
