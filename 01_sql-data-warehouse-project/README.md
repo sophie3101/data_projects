@@ -65,3 +65,5 @@ SQL queries are stored in [doc](doc)
 ## Visualization
 
 The final dashboard showcasing the sales data can be viewed here: [link](https://public.tableau.com/views/Sales_dashboard_17513199682000/Dashboard1?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
+
+![Tableau Dashboard](doc/Tableau_dashboard.png)
