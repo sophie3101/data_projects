@@ -1,9 +1,10 @@
 import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) #Python sets the working directory to scripts/, and it doesn't see the etl/ folder at the same level as scripts/
-from etl import historical_figure_data, ssa_data, historical_figure_names
-from utils import logger as Logger
-from dotenv import load_dotenv
 import pandas as pd
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) #Python sets the working directory to scripts/, and it doesn't see the etl/ folder at the same level as scripts/
+from etl import  ssa_data, historical_figure_names
+from utils import logger as Logger
+
+
 
 def main():
   logger = Logger.get_logger(__name__)
@@ -15,7 +16,6 @@ def main():
   for url, rawdata_output_folder, output_file in zip(ssn_urls, ssn_data_folders,ssn_output_files):
     raw_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/raw_data/', rawdata_output_folder))
     output_data_filepath =  os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/processed_data/', output_file))
-    logger.info(raw_data_dir)
     if not os.path.exists(raw_data_dir ):
       ssa_data.download_file_from_link(url, raw_data_dir)
     if not os.path.exists(output_data_filepath):
@@ -29,13 +29,13 @@ def main():
   ssa_df = pd.read_csv(os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/processed_data/', 'names_by_year.csv')))
   names = ssa_df.Name.unique()
   logger.debug(len(names))
-  # getting the top 1000 frequent names 
+  # # getting the top 1000 frequent names 
   avg_occurences = ssa_df.groupby('Name').agg(AvgOccurences=('Occurences', 'mean')).sort_values("AvgOccurences", ascending=False).reset_index()
-  top_names = avg_occurences.loc[:5].Name.unique()
-  load_dotenv()
-  ninja_api_key = os.getenv("NINJA_API")
+  top_names = avg_occurences.loc[:100].Name.unique()
+  historical_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/processed_data/', "historical_figures.csv"))
+  historical_figure_names.main(top_names, historical_file)
 
-  historical_figure_names.get_all_historical_figure_names(top_names, ninja_api_key)
+  """get name meaning"""
 
 
 if __name__=="__main__":

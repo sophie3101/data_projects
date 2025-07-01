@@ -65,13 +65,4 @@ def get_one_historical_figure_data( input_name, url, headers):
   except Exception as e:
     logger.error("Error in fetching data ",e)
   return rows 
-def main():
-  headers = {
-    "Authorization": f"Bearer aVDes1EPyS77fcFlibCxHA==3k4R1kqzWUc7C8MC", 
-  }
-  api_url =  f"https://api.api-ninjas.com/v1/historicalfigures?name=annie"
-  row = get_one_historical_figure_data("annie", api_url, {'X-Api-Key': "aVDes1EPyS77fcFlibCxHA==3k4R1kqzWUc7C8MC"})
-  logger.info(row)
 
-if __name__ == "__main__":
-  main()
