@@ -1,6 +1,7 @@
-# ETL Demo: Data Warehousing & Analytics Pipeline
+# ETL Demo: Data Warehousing & Analytics Pipeline with Airflow
+![](doc/etl_dag-graph.png)
 
-This project demonstrates an end-to-end data warehousing and analytics solution. It walks through the full ETL process—from ingesting raw data to transforming it using Python, loading it into a PostgreSQL database, and visualizing it with Tableau.
+This project showcases a complete data warehousing and analytics pipeline using Airflow. It covers the entire ETL workflow — from ingesting raw data, transforming it with Python, loading it into a PostgreSQL database, to ultimately visualizing the results with Tableau. 
 
 ## Objective
 
@@ -18,6 +19,7 @@ This project demonstrates an end-to-end data warehousing and analytics solution.
 
 ```
 project-root/
+├── dags/ # Airflow DAG scripts
 ├── src/ # ETL scripts and pipeline code
 │ ├── main.py # Main entry point for running ETL
 │ ├── etl/ # Extraction, transformation, and loading modules
@@ -27,7 +29,8 @@ project-root/
 │
 ├── etl.log # Log file generated during ETL runs
 |
-├── requirements.txt # listing required packages to run the pipeline
+├── requirement.txt #  Dependencies for running the pipeline
+├── requirements.txt # # Packages required for Airflow
 │
 └── README.md # Project overview and instructions
 ```
@@ -40,13 +43,18 @@ Clone the repository:
 git clone https://github.com/yourusername/etl-demo.git
 ```
 
-Run the ETL pipeline:
+Run the ETL pipeline alone:
 
 ```
 python src/main.py
 ```
-
 Check `etl.log` for detailed logs.
+
+To run the Airflow DAGs:
+```
+astro dev start
+```
+
 
 ## Logging
 
