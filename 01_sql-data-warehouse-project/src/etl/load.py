@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 import pandas as pd
 import os 
-from utils.database_utils import check_database, connect_to_database, close_db
-from utils.logger import get_logger
+from src.utils.database_utils import check_database, connect_to_database, close_db
+from src.utils.logger import get_logger
 logger = get_logger(__name__)
 def load_dataset(config):
 
@@ -15,7 +15,6 @@ def load_dataset(config):
   db = postgressql_config["database_name"]
   ddl_file = postgressql_config['ddl']
 
-  
   with open(ddl_file, 'r') as fh:
     ddl_query = fh.read()
 
@@ -35,5 +34,5 @@ def load_dataset(config):
                           f)
     close_db(conn, cursor)
  
-if __name__=="__main__":
-  load_dataset()
+# if __name__=="__main__":
+#   load_dataset()

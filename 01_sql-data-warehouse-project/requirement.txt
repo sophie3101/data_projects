@@ -1,0 +1,5 @@
+numpy==1.24.1
+pandas==1.5.3
+psycopg2==2.9.10
+python-dotenv==1.1.1
+Requests==2.32.4

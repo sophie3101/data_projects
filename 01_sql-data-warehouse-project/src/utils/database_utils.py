@@ -2,7 +2,7 @@ import psycopg2
 from psycopg2 import sql
 import os
 from dotenv import load_dotenv
-from utils.logger import get_logger
+from src.utils.logger import get_logger
 logger = get_logger(__name__)
 # from sqlalchemy import create_engine
 
@@ -28,7 +28,7 @@ def check_database(database_name, username, password, host, port):
       #   logger.info(f"Database {database_name} exists!")
       
   except Exception as e:
-    logger.error("ERROR: ", e)
+    logger.info(f"ERROR: {e}")
   return True
 
 def connect_to_database(database_name, username, password, host, port):
@@ -46,8 +46,8 @@ def connect_to_database(database_name, username, password, host, port):
     # engine = create_engine(f"postgresql://{username}:{password}@{host}:{port}/{database_name}")
     # return engine
   except Exception as e:
-    logger.info("ERROR: ", e)
-
+    logger.info(f"ERROR: {e}")
+    raise
 
 def close_db(conn,cursor):
   conn.commit()

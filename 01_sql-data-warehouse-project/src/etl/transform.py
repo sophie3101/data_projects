@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-from utils.logger import get_logger
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 def transform_data(function_dict, src_file, dest_file):
@@ -52,7 +52,7 @@ def transform_product_info(df):
   df.prd_end_dt = df.prd_end_dt\
                         .fillna(df.prd_start_dt.shift(-1))\
                         .fillna(df.prd_start_dt.shift(1) ) #if the last row is empty, use the previous row
-  df[['prd_cat_id', 'prd_sub_key']]=df.prd_key.str.extract(f'(\w+-\w+)-(.*)')
+  df[['prd_cat_id', 'prd_sub_key']]=df.prd_key.str.extract(r'(\w+-\w+)-(.*)')
   df.prd_cat_id = df.prd_cat_id.str.replace("-","_")
 
   return df

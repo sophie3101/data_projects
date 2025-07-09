@@ -1,11 +1,9 @@
-import json
+import json, sys,os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from etl import extract, load, transform
 from utils.logger import get_logger
-from synthetic_data import  synthetic_data
 
-def generate_synthetic_data():
-  synthetic_data.generate_synthetic_data()
-  return
 def run_pipeline():
   logger = get_logger(__name__, "etl.log")
   logger.info('Starting ETL process') 
@@ -34,4 +32,4 @@ def run_pipeline():
 
 if __name__=="__main__":
   run_pipeline()
-  # generate_synthetic_data()
+
