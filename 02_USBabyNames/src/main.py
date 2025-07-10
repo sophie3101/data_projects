@@ -10,8 +10,12 @@ def main():
   config.read("config.ini")
 
   """DOWNLOAD NAMES DATA FROM SSN"""
+  data_folder = config.get("DATA_FOLDER", "data_folder")
+  os.makedirs(data_folder, exist_ok=True)
   raw_data_folder = config.get("DATA_FOLDER", "raw_folder")
+  os.makedirs(raw_data_folder, exist_ok=True)
   processed_data_folder = config.get("DATA_FOLDER", "processed_folder")
+  os.makedirs(processed_data_folder, exist_ok=True)
 
   ssn_urls = config.get("SSN", "urls").split(",")
   ssn_raw_data_folders = config.get("SSN", "output_folders").split(",")

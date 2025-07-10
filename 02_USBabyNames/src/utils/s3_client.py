@@ -2,7 +2,7 @@
 Functions for using AWS S3
 """
 from urllib.parse import urlparse
-import boto3
+import boto3, os
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -63,8 +63,8 @@ def check_s3_path(s3_client, bucket, key):
     response = s3_client.head_object(Bucket=bucket, Key=key)
     return True
   except Exception as e:
-    logger.error(e)
- 
+    logger.info(f"{key } not found")
+  return False
 
 def uploadToS3(s3_client, file_name, s3_uri):
   """
@@ -80,6 +80,8 @@ def uploadToS3(s3_client, file_name, s3_uri):
   """
   try:
     bucket, key = get_bucket_n_key_from_s3uri(s3_uri)
+    key=f"{key}{os.path.basename(file_name)}"
+    logger.info(key)
     if bucket and key:
       if not check_s3_path(s3_client, bucket, key):
         s3_client.upload_file(file_name, bucket, key)
