@@ -40,19 +40,19 @@ def main():
   uploadToS3(s3_client, names_file_path, config.get("S3", "s3_uri") )
   
 
-  # """getting the top 1000 frequent names """
-  # names_file_path = os.path.abspath(os.path.join(processed_data_folder, config.get("HISTORICAL_FIGURES", "in_file")))
-  # ssa_df = pd.read_csv(names_file_path)
-  # agg_occurences = ssa_df.groupby('Name').agg(AvgOccurences=('Occurences', 'sum')).sort_values("AvgOccurences", ascending=False).reset_index()
-  # top_names = agg_occurences.loc[:1000].Name.unique()
+  """getting the top 1000 frequent names """
+  names_file_path = os.path.abspath(os.path.join(processed_data_folder, config.get("HISTORICAL_FIGURES", "in_file")))
+  ssa_df = pd.read_csv(names_file_path)
+  agg_occurences = ssa_df.groupby('Name').agg(AvgOccurences=('Occurences', 'sum')).sort_values("AvgOccurences", ascending=False).reset_index()
+  top_names = agg_occurences.loc[:1000].Name.unique()
 
-  # """DOWNLOAD NAME ASSOCIATED DATA FROM NINJA NAME API"""
-  # historical_file = os.path.abspath(os.path.join(processed_data_folder, config.get("HISTORICAL_FIGURES", "out_file")))
-  # historical_figure_names.main(top_names, historical_file)
+  """DOWNLOAD NAME ASSOCIATED DATA FROM NINJA NAME API"""
+  historical_file = os.path.abspath(os.path.join(processed_data_folder, config.get("HISTORICAL_FIGURES", "out_file")))
+  historical_figure_names.main(top_names, historical_file)
 
-  # """get name meaning"""
-  # name_meaning_file = os.path.abspath(os.path.join(processed_data_folder, config.get("NAMES_MEANING", "out_file")))
-  # name_meaning.main(top_names, name_meaning_file)
+  """get name meaning"""
+  name_meaning_file = os.path.abspath(os.path.join(processed_data_folder, config.get("NAMES_MEANING", "out_file")))
+  name_meaning.main(top_names, name_meaning_file)
 
 if __name__=="__main__":
   main()
