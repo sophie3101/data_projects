@@ -1,4 +1,5 @@
 # US Baby Name Analysis
+![](doc/workflow.png)
 
 This project extracts U.S. baby names from the Social Security Administration (SSA) dataset, enriches the data with information on historical figures and name meanings, and converts the data from CSV to Parquet for efficient processing. It also features an AWS Lambda function, created using Terraform, that triggers automatically when a new CSV file is uploaded to a specified S3 path.
 
