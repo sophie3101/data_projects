@@ -74,7 +74,8 @@ engine or syncing data from an existing database to Amazon S3 on an ongoing basi
 # AWS services for transforming data
 - AWS Lambda for light transformations: can run up to 15 min, mazimum memory of 10GB
 - AWS Glue: serverless, user need to specify Data Processing Units (DPUS)
-- AWS Glue DataBrew: apply transformations to data wo write or manage any code
+- Glue. crawlers: process to examine data source, infer the schema and populate technical data catalog
+- AWS Glue DataBrew: apply transformations to data wo write or manage any code. Also used to generate profile information on a dataset
 - AWS Glue Data catalog: provide logical view of data in the storage layer
  - AWS EMR: open source big data processing tools such as Apache Spark, Hive, Hudi,Presto, Pig...
 
@@ -89,3 +90,9 @@ not a serverless environement like Amazon Step Functions
 - Amazon Redshift: for reporting and analytic workloads
 - Amazon Redshift Spectrum: enable user to write query that gather data loaded into data warehouse and data exists outside data warehouse (in data lake)
 -Amazon Quicksight for visualizing the data
+
+-authenticate: validate
+- authorize: porcess of authorizing access
+- Data profiling: identify missing values, distinct values, unique values, min/max
+- data lineage: understanding of how dataset has been created
+- Amazon Macie: managed serviced to discover and protect sensitive data or use AWS Glue Studio Detect PII transofrm during dta processing job

@@ -62,6 +62,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+
 ####  Configure AWS CLI
 ```aws configure```
 
@@ -81,6 +82,10 @@ Confirm the plan to provision:
 - S3 bucket
 - Lambda function with layer
 - S3 trigger for Lambda
+
+## Data Visualization
+
+https://public.tableau.com/shared/PXC564KHY?:display_count=n&:origin=viz_share_link
 ## To Do
 - Add unit tests
 - Build API from the output datasets
