@@ -1,3 +1,6 @@
+  Data may be cleansed and processed with Glue ETL jobs in the
+data lake, for example, and then hot data can be loaded into Redshift so that it can be queried via
+BI tools with optimal performance.
  There are various different types of Redshift nodes, and this figure below shows a Redshift cluster based on RA3 nodes
 ![](../images/redshift_cluster.png)
 -  leader node interfaces with client applications, receives and parses queries, and coordinates query execution on compute nodes

@@ -32,6 +32,19 @@ only attributes with a direct correlation with the table’s primary key.
 - Feeding data into wareehouse: ELT OR ETL 
 ![](../images/ETL.png)
 
+Kimball’s Approach:
+
+- Conceptual Model: A high-level view — what business processes are involved?
+- Logical Model: A detailed structure of tables, attributes, and relationships, independent of technology.
+- Physical Model: The actual implementation in a database, optimized for performance.
+
+Slowly Changing Dimensions (SCD): Tracking Changes Over Time
+Types of SCDs in Kimball Modeling:
+
+SCD Type 1 (Overwrite Data): Updates the record without keeping history (e.g., Netflix overwrites your last-used profile name).
+SCD Type 2 (Preserve History): Creates a new row with start/end dates (e.g., tracking past job titles in an HR database).
+SCD Type 3 (Limited History): Stores only previous and current values (e.g., keeping your last two addresses in a shipping system).
+
 - data lake: bringing together a variety of data of all sizes and types (structured, semi-structured, or unstructured) in one place
 ![](../images/data_lake.png)
     - Structured data (row-column based tables)
@@ -55,7 +68,7 @@ tools such as Amazon SageMaker
     - Delta Lake
     - Apache Hudi
     - Apache Iceberg
-
+- data mesh strategy: make datasets more easily discoverable 
 # AWS services for ingesting data
 - Amazon DMS: Amazon DMS simplifies migrating from one database engine to a different database
 engine or syncing data from an existing database to Amazon S3 on an ongoing basis. USe CDC: Change Data Capture
@@ -77,12 +90,33 @@ engine or syncing data from an existing database to Amazon S3 on an ongoing basi
 - Glue. crawlers: process to examine data source, infer the schema and populate technical data catalog
 - AWS Glue DataBrew: apply transformations to data wo write or manage any code. Also used to generate profile information on a dataset
 - AWS Glue Data catalog: provide logical view of data in the storage layer
- - AWS EMR: open source big data processing tools such as Apache Spark, Hive, Hudi,Presto, Pig...
+ - AWS EMR: managed service, open source big data processing tools such as Apache Spark, Hive, Hudi,Presto, Pig...
 
 
 -MWAA (Managed Workflows for Apache Airflow): enable users to deploy Airflow that can automatically scale out
 not a serverless environement like Amazon Step Functions
+- Common data transformation include:
+    - protecting PII data
+    - optimizing file format (csv to parquet). because Parquet are column-based
+    - optimizing with data partiioning
+- data cleaning:
+    - ensuring consistent column names
+    - changing column data types
+    - ensuring standard column format
+    - remove duplicate records
+    - provide missing values 
 
+- data denormaliztion: 
+    can be done with apache spark, GUI based tools or SQL
+
+- Enriching data: join with thrid party (e.g using AWS Data Exchange)
+- pre-aggregating data 
+
+- extracting metadata from unstructure data: using AI like Amazon Rekognition (image), Amazon Transcribe (audio), Amazon Comprehend (sentiment analysis) 
+
+- Working with CDC (Change Data capture): 
+    read blog
+    - use Modern approaches: open table format, to support idea of transational data lake (contains proeprties that were previously only available in a traditional databe such as update and delete individual records). Achae iceberg designed as OTF, Apache Huidi, databricks Delta lake
 # AWS services for consuming  data
 - Amazon Athena 
 - Athena Federated Query: build connectors so that Athena can query other data sources beyond S3 like Amazon DynamoDB(NoSQL), Cloudwatch logs
@@ -96,3 +130,6 @@ not a serverless environement like Amazon Step Functions
 - Data profiling: identify missing values, distinct values, unique values, min/max
 - data lineage: understanding of how dataset has been created
 - Amazon Macie: managed serviced to discover and protect sensitive data or use AWS Glue Studio Detect PII transofrm during dta processing job
+
+
+-for pipeline orchestrating:

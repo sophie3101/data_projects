@@ -1,0 +1,7 @@
+
+services:
+  scheduler:
+    volumes:
+      # Mount local 'data' folder into the worker's '/usr/local/airflow/data', rw means read and write, ro means read only
+      - ./data:/usr/local/airflow/data:rw
+

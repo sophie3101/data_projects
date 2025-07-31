@@ -60,3 +60,10 @@ or to use sql on database (pgAdmin)
 5. connect to postgreSQL:
 - create connection on airflowUI (admin => create connections)
 -  use PostgreSQL Hook in DAG script
+
+6. s3 conenction
+in requirements.txt file, put apache-airflow-providers-amazon
+then run astro dev restart
+to create connection, either manually create in UI (admin-> create connections) or define in airflow_setttings.yaml
+to verify connection: 
+astro dev bash -> airflow connections get aws_connection 

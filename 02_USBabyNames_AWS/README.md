@@ -74,6 +74,8 @@ Confirm the plan to provision:
 - Lambda function with layer
 ..
 
+After running `terraform apply`, Terraform will provision the necessary resources and output the generated S3 bucket name and Lambda function name for the project. Be sure to update these values in the `config.ini` file before triggering the workflow with Airflow.
+
 ## Data Visualization
 ![](doc/screenshot.png)
 [View the interactive dashboard on Tableau](https://public.tableau.com/shared/PXC564KHY?:display_count=n&:origin=viz_share_link)
