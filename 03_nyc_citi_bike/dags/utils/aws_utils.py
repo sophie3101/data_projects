@@ -1,6 +1,6 @@
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.models.connection import Connection
-
+from airflow.providers.amazon.aws.hooks.glue_catalog import GlueCatalogHook
 def check_aws_connection(conn_id):
     """Check AWS connection
     """
@@ -31,3 +31,8 @@ def upload_file(s3_hook, s3_bucket_name, prefix, local_file_path):
         replace=True
     )
     print(f"File '{local_file_path}' uploaded to s3://{s3_bucket_name}/{prefix}")
+
+def get_glue_partitions(conn_id):
+    hook = GlueCatalogHook(aws_conn_id=conn_id)
+    glue_partitions = hook.get_partitions(database_name='citibike_db', table_name='clean_zones')
+    return glue_partitions
