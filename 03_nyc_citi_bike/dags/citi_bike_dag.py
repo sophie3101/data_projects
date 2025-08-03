@@ -50,7 +50,8 @@ def citi_bikes_etl():
             cur_year = str(now.year)
             prev_month = f"{now.month-1:02d}"
             zip_names = [n for n in zip_names if n[1]==cur_year and n[2]==prev_month]
-      
+
+
         return zip_names
     
     @task
@@ -61,7 +62,7 @@ def citi_bikes_etl():
 
         zip_file_name, year, month = zip_file_tuple
         tmp_folder = f"tmp_{year}"
-
+        remove_folder(tmp_folder)
         print("EXTRACTING ", zip_file_name, year, month)
     
         s3_prefix = f"{s3_raw_zones}/year={year}"
@@ -87,10 +88,14 @@ def citi_bikes_etl():
                     else:
                         raise AirflowException(f"not be able to get the month from the file {os.path.basename(extracted_filepath)}")
 
-                try:
-                    print(f"Uploading {extracted_filepath} to {cur_s3_prefix}")
-                    upload_file(s3_hook, S3_BUCKET_NAME, f"{cur_s3_prefix}/{os.path.basename(extracted_filepath)}", extracted_filepath)
+                try:                 
+                    if not check_s3_prefix_existence(s3_hook, S3_BUCKET_NAME, f"{cur_s3_prefix}/{os.path.basename(extracted_filepath)}"):
+                        print(f"Uploading {extracted_filepath} to {cur_s3_prefix}")
+                        upload_file(s3_hook, S3_BUCKET_NAME, f"{cur_s3_prefix}/{os.path.basename(extracted_filepath)}", extracted_filepath)
+                    else:
+                        remove_file(extracted_files)
                 except Exception as e:
+                    remove_folder(tmp_folder)
                     raise AirflowException(f"Failed to upload {extracted_filepath} to S3: {str(e)}")
             
             #after files are uploaded, remove the temp folder

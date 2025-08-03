@@ -28,7 +28,7 @@ newColumns = []
 for column in df.columns:
     column = column.lower()
     column = column.replace(' ', '_')
-    if column=='startime' or column=='start_time':
+    if column=='starttime' or column=='start_time':
         column='started_at'
     if column=='stoptime' or column=='stop_time':
         column='ended_at'
@@ -40,7 +40,7 @@ for column in df.columns:
         column='end_lat'
     if column=='end_station_longitude':
         column='end_lng'
-    if column=='user_type':
+    if column=='user_type' or column=='usertype':
         column='member_casual'
 
     newColumns.append(column)

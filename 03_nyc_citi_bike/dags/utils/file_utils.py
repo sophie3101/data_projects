@@ -14,6 +14,9 @@ import requests, zipfile, io, os,re, shutil
 #     except Exception as e:
 #         print("ERROR in downloading zip file: ", e)
 #         raise
+def remove_file(file_path):
+    os.remove(file_path)
+    
 def remove_folder(des_folder):
     if os.path.exists(des_folder):
         print(f"{des_folder} exists, delete ")
@@ -21,7 +24,6 @@ def remove_folder(des_folder):
 
 def download_n_extract(url, des_folder):
     
-
     os.makedirs(des_folder, exist_ok=True)
     try:
         response = requests.get(url)
