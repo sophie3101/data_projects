@@ -47,7 +47,7 @@ for column in df.columns:
 df = df.toDF(*newColumns)
 
 # drop columns for cross consistency
-columns_to_drop = ["ride_id","bike_id", "birth_year", "gender"]
+columns_to_drop = ["ride_id","bike_id", "birth_year", "gender", "tripduration", "bikeid"]
 for col in columns_to_drop:
     if col in df.columns:
         df=df.drop(col)

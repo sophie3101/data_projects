@@ -1,0 +1,20 @@
+SELECT 
+    CAST("year" AS integer) AS "year",
+    CAST("month" AS integer) AS "month",
+    EXTRACT(day FROM started_at) AS started_day,
+    EXTRACT(hour FROM started_at) AS started_hour,
+    EXTRACT(day FROM ended_at) AS ended_day,
+    EXTRACT(hour FROM ended_at) AS ended_hour,
+    start_station_name, 
+    start_station_id,
+    start_lat,
+    start_lng,
+    end_station_name, 
+    end_station_id,
+    end_lat,
+    end_lng,
+    trip_duration,
+    REPLACE(rideable_type, '_bike', '') AS rideable_type, 
+    member_casual
+FROM {{source('raw_data', 'raw_trips')}}
+WHERE year='2024'

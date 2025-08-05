@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: raw_data
+    database: AwsDataCatalog 
+    schema: citibike_database
+    tables:
+      - name: raw_trips # table name used in dbt
+        identifier: clean_zones #actual table in Athena
+  
+      - name: raw_weather # table name used in dbt
+        identifier: weather_data #actual table in Athena

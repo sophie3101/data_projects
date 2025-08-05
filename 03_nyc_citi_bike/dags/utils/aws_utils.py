@@ -1,6 +1,7 @@
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.models.connection import Connection
 from airflow.providers.amazon.aws.hooks.glue_catalog import GlueCatalogHook
+from io import BytesIO
 def check_aws_connection(conn_id):
     """Check AWS connection
     """
@@ -23,6 +24,17 @@ def check_aws_connection(conn_id):
 def check_s3_prefix_existence(s3_hook,bucket_name, prefix, delimiter='/'):
     return s3_hook.check_for_prefix(prefix, delimiter, bucket_name)
 
+def upload_file_ob(s3_hook, s3_bucket_name, prefix, df):
+    csv_bytes = df.to_csv(index=False).encode('utf-8')
+    csv_buffer = BytesIO(csv_bytes)
+    csv_buffer.seek(0)
+    s3_hook.load_file_obj(
+        file_obj=csv_buffer,
+        key=prefix,
+        bucket_name=s3_bucket_name,
+        replace=True # Set to True to overwrite if the key already exists
+    )
+
 def upload_file(s3_hook, s3_bucket_name, prefix, local_file_path):
     s3_hook.load_file(
         filename=local_file_path,
@@ -34,5 +46,5 @@ def upload_file(s3_hook, s3_bucket_name, prefix, local_file_path):
 
 def get_glue_partitions(conn_id):
     hook = GlueCatalogHook(aws_conn_id=conn_id)
-    glue_partitions = hook.get_partitions(database_name='citibike_db', table_name='clean_zones')
+    glue_partitions = hook.get_partitions(database_name='citibike_database', table_name='clean_zones')
     return glue_partitions

@@ -115,16 +115,16 @@ output "redshift_role_name" {
 #######################################
 ###########REDSHIFT CLUSTER############
 #######################################
-# resource "aws_redshift_cluster" "redshift_cluster" {
-#   cluster_identifier = "citibike-redshift-cluster"
-#   node_type          = "ra3.large" 
-#   cluster_type       = "single-node" 
-#   master_username    = var.redshift_cluster_username
-#   master_password    = var.redshift_cluster_password
-#   encrypted          = true
-#   skip_final_snapshot = true 
-#   iam_roles = [aws_iam_role.redshift_role.arn]
-# }
+resource "aws_redshift_cluster" "redshift_cluster" {
+  cluster_identifier = "citibike-redshift-cluster"
+  node_type          = "ra3.large" 
+  cluster_type       = "single-node" 
+  master_username    = var.redshift_cluster_username
+  master_password    = var.redshift_cluster_password
+  encrypted          = true
+  skip_final_snapshot = true 
+  iam_roles = [aws_iam_role.redshift_role.arn]
+}
 
 #######################################
 ###########GLUE CATALOG############
@@ -134,12 +134,22 @@ resource "aws_glue_catalog_database" "glue_database" {
   name = "citibike_database"
 }
 
-resource "aws_glue_crawler" "glueCrawler" {
+resource "aws_glue_crawler" "citibike_glue_crawler" {
   name          = "citibike_glue_crawler"
   database_name = aws_glue_catalog_database.glue_database.name
   role          = aws_iam_role.glue_service_role.name
 
   s3_target {
     path = "s3://${aws_s3_bucket.s3_bucket.bucket}/clean_zones"
+  }
+}
+
+resource "aws_glue_crawler" "weather_glue_crawler" {
+  name          = "weather_glue_crawler"
+  database_name = aws_glue_catalog_database.glue_database.name
+  role          = aws_iam_role.glue_service_role.name
+
+  s3_target {
+    path = "s3://${aws_s3_bucket.s3_bucket.bucket}/weather_data"
   }
 }

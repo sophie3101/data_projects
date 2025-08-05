@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: citibike_facts
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: month
+        tests: [not_null]
+      - name: start_station_name
+        tests: [not_null]
+      - name: member_casual
+        tests:
+           - accepted_values:
+              values: ['member', 'casual']
+      - name: rideable_type
+        tests:
+           - accepted_values:
+              values: ['classic', 'electric']
