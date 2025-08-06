@@ -17,4 +17,4 @@ SELECT
     REPLACE(rideable_type, '_bike', '') AS rideable_type, 
     member_casual
 FROM {{source('raw_data', 'raw_trips')}}
-WHERE year='2024'
+-- WHERE year='2024'

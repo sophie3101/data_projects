@@ -1,10 +1,12 @@
 from airflow.decorators import dag, task
+from airflow.utils.trigger_rule import TriggerRule
 from airflow.exceptions import AirflowException
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.amazon.aws.operators.glue import GlueJobOperator
 from airflow.providers.amazon.aws.sensors.glue import GlueJobSensor
 from airflow.providers.amazon.aws.operators.glue_crawler import GlueCrawlerOperator
 from airflow.providers.amazon.aws.operators.athena import AthenaOperator
+from airflow.operators.bash import BashOperator
 from airflow.providers.standard.operators.empty import EmptyOperator    
 from airflow.utils.task_group import TaskGroup
 from airflow.models import Variable
@@ -68,13 +70,13 @@ def citi_bikes_etl():
     def verify_aws_connection():
         """Verify AWS connection is valid
         Returns:
-            None
+            bool:True if connection is valid
         Raises:
             AirflowException: If the data retrieval fails or an error occurs during the process.
         """
         try:
-            check_aws_connection(AWS_CONN_ID)
-        
+            is_valid_conn=check_aws_connection(AWS_CONN_ID)
+            return is_valid_conn
         except Exception as e:
             raise AirflowException(f"AWS connection verification failed: {str(e)}")
     
@@ -82,16 +84,12 @@ def citi_bikes_etl():
     def get_src_ziplinks(url):
         """
         Retrieves Citi Bike zip file links from the NYC Citi Bike website.
-
         For initial load:
             - Extracts all available zip file links from the year 2020 up to the current year.
-
         For incremental load:
             - Extracts only the zip file link for the previous month's data.
-
         Args:
             url: the link of nyc citi bike website
-
         Returns:
             list: A list of zip file URLs.
         Raises:
@@ -114,6 +112,13 @@ def citi_bikes_etl():
     
     @task 
     def prepare_zip_files_to_process(src_ziplinks):
+        """
+        Filters and returns a list of ZIP file links that have not yet been processed.
+        Args:
+            src_ziplinks (list): A list of URLs or file paths pointing to ZIP files.
+        Returns:
+            list: A list of ZIP file links that need to be processed (i.e., not already processed).
+        """
         s3_hook=S3Hook(aws_conn_id=AWS_CONN_ID)
         to_process_ziplinks = []
         for zip_file_tuple in src_ziplinks:
@@ -139,7 +144,15 @@ def citi_bikes_etl():
 
     @task
     def extract_n_upload_one_ziplink(zip_file_tuple):
-        """Download and extract zip files, prepare files for S3 upload."""
+        """
+        Downloads and extracts the contents of a ZIP file, and uploads the extracted files to S3.
+        Args:
+            zip_file_tuple (tuple): A tuple containing zip file name, year and month
+        Returns:
+            None
+        Raises:
+            AirflowException: If any step in the download, extraction, or upload process fails.
+            """
         s3_raw_zones= "raw_zones"
         s3_hook=S3Hook(aws_conn_id=AWS_CONN_ID)
 
@@ -187,10 +200,15 @@ def citi_bikes_etl():
             
             #after files are uploaded, remove the temp folder
             remove_folder(tmp_folder)
-
+        return 
+    
     @task
     def get_s3_raw_path_to_process():
-        """Identify S3 raw paths that need processing."""
+        """
+        Identifies raw S3 paths that require cleaning and conversion to Parquet format.
+        Returns:
+            list: A list of S3 paths that need to be processed.
+        """
         s3_hook = S3Hook(aws_conn_id=AWS_CONN_ID)
         s3_raw_path_to_process_list = []
         
@@ -212,7 +230,13 @@ def citi_bikes_etl():
     
     @task
     def prepare_glue_job_configs(s3_raw_path_to_process_list):
-        """Prepare configurations for Glue jobs."""
+        """
+        Prepares AWS Glue job configurations based on the list of raw S3 paths to be processed.
+        Args:
+            s3_raw_path_to_process_list (list): A list of S3 raw paths that require cleaning and conversion.
+        Returns:
+            list: A list of configuration dictionaries for submitting Glue jobs.
+        """
         glue_script = Variable.get("glue_script")
         glue_script_s3_uri = f"s3://{S3_BUCKET_NAME}/{glue_script}"
         glue_job_configs = []
@@ -236,6 +260,11 @@ def citi_bikes_etl():
    
     @task.branch(task_id="should_run_glue_crawler")
     def should_run_glue_crawler():
+        """
+        Determines whether the Glue Crawler should be run,
+        Returns:
+            str: The task ID to proceed with next, depending on the condition 
+        """
         start_glue_crawler=False
         glue_partions=get_glue_partitions(AWS_CONN_ID)
         year_partitions=[item[0] for item in glue_partions]
@@ -267,52 +296,78 @@ def citi_bikes_etl():
     start_task= EmptyOperator(task_id="start_task")
     verify_connection_task = verify_aws_connection()
     with TaskGroup(group_id="process_citi_bike_data") as citibike_group_task:
-        """EXTRACT TASKS"""
-        src_ziplinks = get_src_ziplinks("https://s3.amazonaws.com/tripdata")
-        ziplinks_to_process=prepare_zip_files_to_process(src_ziplinks)
-        extract_n_upload_tasks = extract_n_upload_one_ziplink.expand(zip_file_tuple=ziplinks_to_process)
-        
-        """TRANSFORM TASK: raw zones to clean zones"""
-        s3_raw_paths=get_s3_raw_path_to_process()
-        glue_configs = prepare_glue_job_configs(s3_raw_paths)
-        glue_jobs=GlueJobOperator.partial(
-            task_id="run_glue_job_",
-            region_name="us-east-1", 
-            aws_conn_id=AWS_CONN_ID,
-            create_job_kwargs={
-            'GlueVersion': '4.0',
-            'NumberOfWorkers': 2,
-            'WorkerType': 'G.1X',
-            },
-            wait_for_completion=True,       
-        ).expand_kwargs(glue_configs)
-        
-        """create glue crawler to run query on REDSHIFT SPECTRUM"""
-        run_glue_crawler = GlueCrawlerOperator(
-            task_id="glue_crawler_task",
-            config={"Name":"citibike_glue_crawler"},
+        with TaskGroup(group_id="extract_tasks") as extract_group_task:
+            """EXTRACT TASKS"""
+            src_ziplinks = get_src_ziplinks("https://s3.amazonaws.com/tripdata")
+            ziplinks_to_process=prepare_zip_files_to_process(src_ziplinks)
+            extract_n_upload_tasks = extract_n_upload_one_ziplink.expand(zip_file_tuple=ziplinks_to_process)
+            src_ziplinks>>ziplinks_to_process>> extract_n_upload_tasks
+
+        with TaskGroup(group_id="transform_tasks") as transform_group_task:
+            start_transform = EmptyOperator(
+                task_id="start_transform",
+                trigger_rule=TriggerRule.ALL_DONE  # Runs if upstream succeeded OR skipped OR failed
+            )
+            """TRANSFORM TASK: raw zones to clean zones"""
+            s3_raw_paths=get_s3_raw_path_to_process()
+            glue_configs = prepare_glue_job_configs(s3_raw_paths)
+            glue_jobs=GlueJobOperator.partial(
+                task_id="run_glue_job_",
+                region_name="us-east-1", 
+                aws_conn_id=AWS_CONN_ID,
+                create_job_kwargs={
+                'GlueVersion': '4.0',
+                'NumberOfWorkers': 2,
+                'WorkerType': 'G.1X',
+                },
+                wait_for_completion=True,       
+            ).expand_kwargs(glue_configs)
+            
+            """create glue crawler to run query on REDSHIFT SPECTRUM"""
+            citi_crawler = Variable.get("glue_crawler_name")
+            run_glue_crawler = GlueCrawlerOperator(
+                task_id="glue_crawler_task",
+                config={"Name":citi_crawler},
+                aws_conn_id=AWS_CONN_ID,
+                wait_for_completion=True,
+                region_name="us-east-1",
+            )
+
+            choose_task = should_run_glue_crawler()
+            choose_task.Trigger_rule = TriggerRule.NONE_FAILED # run if none failed (skip is allowed)
+            skip_task = EmptyOperator(task_id="skip_task")
+            # src_ziplinks >> ziplinks_to_process >>extract_n_upload_tasks 
+            # src_ziplinks>>ziplinks_to_process>> extract_n_upload_tasks >>s3_raw_paths >> glue_configs >>glue_jobs >>choose_task >>[skip_task, run_glue_crawler]
+            # choose_task >>[skip_task, run_glue_crawler]
+            start_transform>>s3_raw_paths>> glue_configs >>glue_jobs >>choose_task >>[skip_task, run_glue_crawler]
+        with TaskGroup(group_id="load_task") as load_group_task:
+            start_dbt = EmptyOperator(
+                task_id="start_dbt",
+                trigger_rule=TriggerRule.ALL_DONE  # Runs if upstream succeeded OR skipped OR failed
+            )
+            run_dbt = BashOperator(
+                task_id='run_dbt_athena',
+                bash_command="""
+                cd /usr/local/airflow/dbt_athena && \
+                dbt run --profile my_dbt_athena --profiles-dir .
+                """,
+                
+            )
+            start_dbt >> run_dbt
+        extract_group_task >> transform_group_task >>load_group_task
+
+    with TaskGroup(group_id="process_weather_data") as weather_group_task:
+        get_weather_task = get_all_weather_data()
+        crawler_name = Variable.get("weather_crawler_name")
+        run_weather_glue_crawler = GlueCrawlerOperator(
+            task_id="weather_glue_crawler_task",
+            config={"Name":crawler_name},
             aws_conn_id=AWS_CONN_ID,
             wait_for_completion=True,
             region_name="us-east-1",
         )
-
-        choose_task = should_run_glue_crawler()
-        skip_task = EmptyOperator(task_id="skip_task")
-        # src_ziplinks >> ziplinks_to_process >>extract_n_upload_tasks 
-        ziplinks_to_process>> extract_n_upload_tasks >>s3_raw_paths >> glue_configs >>glue_jobs >>choose_task >>[skip_task, run_glue_crawler]
-        # choose_task >>[skip_task, run_glue_crawler]
-
-    with TaskGroup(group_id="process_weather_data") as weather_group_task:
-        get_weather_task = get_all_weather_data()
-        # run_weather_glue_crawler = GlueCrawlerOperator(
-        #     task_id="weather_glue_crawler_task",
-        #     config={"Name":"weather_glue_crawler"},
-        #     aws_conn_id=AWS_CONN_ID,
-        #     wait_for_completion=True,
-        #     region_name="us-east-1",
-        # )
-        # get_weather_task >> run_weather_glue_crawler
-        get_weather_task
+        get_weather_task >> run_weather_glue_crawler
+        # get_weather_task
 
     end_task = EmptyOperator(task_id='end_task')
     start_task >> verify_connection_task >> [citibike_group_task, weather_group_task]>>end_task

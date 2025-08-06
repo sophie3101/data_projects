@@ -1,0 +1,13 @@
+my_dbt_athena:
+  target: dev
+  outputs:
+    dev:
+      type: athena
+      #database: citibike_database
+      schema: citibike_database
+      s3_data_dir: s3://nyc-citi-bikes-6dfe261a97b83ccc/dbt/
+      s3_staging_dir: s3://nyc-citi-bikes-6dfe261a97b83ccc/athena_results/
+      region_name: us-east-1
+      database: AwsDataCatalog
+      aws_profile_name: son
+      threads: 4
