@@ -6,11 +6,12 @@ GROUP BY start_station_name
 ORDER BY pickup_count DESC
 LIMIT 5
 /* #	start_station_name	pickup_count
-1	Central Park S & 6 Ave	2290
-2	7 Ave & Central Park South	1655
-3	12 Ave & W 40 St	1288
-4	5 Ave & E 72 St	1271
-5	5 Ave & E 87 St	1230 */
+1	W 21 St & 6 Ave	119183
+2	8 Ave & W 31 St	99340
+3	University Pl & E 14 St	95323
+4	Broadway & W 58 St	94954
+5	Lafayette St & E 8 St	94792 */
+
 
 
 -- What are the most popular drop-off locations across the city for NY Citi Bike rental?

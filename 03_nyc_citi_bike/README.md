@@ -1,77 +1,62 @@
-Overview
-========
+# NYC Citi Bike Data Engineering Project
+This project is a modern data pipeline built to ingest, transform, store, and analyze NYC Citi Bike trip data, enriched with weather information. It leverages modern data engineering tools including Apache Airflow, Terraform, AWS Glue, Amazon S3, Redshift, Athena, dbt, and Tableau for end-to-end orchestration, data transformation, warehousing, and visualization.
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+## Stacks
+![](analysis/stacks.png)
 
-Project Contents
-================
+## Workflow Summary
+![](analysis/workflow.png)
 
-Your Astro project contains the following files and folders:
 
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes one example DAG:
-    - `example_astronauts`: This DAG shows a simple ETL pipeline example that queries the list of astronauts currently in space from the Open Notify API and prints a statement for each astronaut. The DAG uses the TaskFlow API to define tasks in Python, and dynamic task mapping to dynamically print a statement for each astronaut. For more on how this DAG works, see our [Getting started tutorial](https://www.astronomer.io/docs/learn/get-started-with-airflow).
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+Use **Terraform** to set up infrastucture, includes: 
+- Amazon S3 bucket
+- IAM roles and policies
+- Redshift cluster
+- AWS Glue crawlers, and catalog
 
-Deploy Your Project Locally
-===========================
+Use **Airflow** to orchestrate the workflow: 
+1. Ingest historical weather data from open-meteo API
+2. Ingest NYC Citi Bike trip data ([src here](https://s3.amazonaws.com/tripdata/index.html)) from year 2020. iThe ingestion can be performed as a full load or incrementally by downloading data from the previous month. 
+3. Uploads extracted data to S3 raw zone
+4. Perform data cleaning and transformation using **PySpark** scripts, orchestrated and executed through **AWS Glue**
+5. Stores cleaned data as Parquet files in S3 clean zone
+6. Crawls the cleaned data and populates the AWS Glue Data Catalog 
+7. Use **dbt** to create `citibike_facts` table, join nyc citi bike trips with weather data
 
-Start Airflow on your local machine by running 'astro dev start'.
 
-This command will spin up five Docker containers on your machine, each for a different Airflow component:
+Use **Athena** or **Redshift spectrum** for data queries and visualize data using **Tableau**
 
-- Postgres: Airflow's Metadata Database
-- Scheduler: The Airflow component responsible for monitoring and triggering tasks
-- DAG Processor: The Airflow component responsible for parsing DAGs
-- API Server: The Airflow component responsible for serving the Airflow UI and API
-- Triggerer: The Airflow component responsible for triggering deferred tasks
+## Installation & Deployment
+### Prerequisites
+- AWS credentials configured
+- Apache Airflow environment is set up using Astro (`astro dev init`)
+- Terraform is installed and initialized(`terraform init`)
+- dbt project is initialized (`dbt init`)
+- Tableau Public is installed and ready for use
 
-When all five containers are ready the command will open the browser to the Airflow UI at http://localhost:8080/. You should also be able to access your Postgres Database at 'localhost:5432/postgres' with username 'postgres' and password 'postgres'.
+### How to run (Step by step)
+#### Provision Infrastructure
+```
+terraform apply
+```
 
-Note: If you already have either of the above ports allocated, you can either [stop your existing Docker containers or change the port](https://www.astronomer.io/docs/astro/cli/troubleshoot-locally#ports-are-not-available-for-my-local-airflow-webserver).
+#### Start Airflow Scheduler
 
-Deploy Your Project to Astronomer
-=================================
+``` astro dev start```
+Trigger the Pipeline DAG on airflow UI
+![](analysis/airflow_graph.png)
 
-If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://www.astronomer.io/docs/astro/deploy-code/
-
-Contact
-=======
-
-The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
-
-https://grok.com/share/c2hhcmQtMw%3D%3D_952be65a-7328-4e9d-a82d-7ad3c28760ad
-
-set s3 bucket name
-set variable in airflow_settings.yaml
-
-test glue job locally
-https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-libraries.html#develop-local-python
-
-1. docker pull public.ecr.aws/glue/aws-glue-libs:5 
-2. 
-WORKSPACE_LOCATION=/Users/u249637/Documents/Personal/data_projects/03_nyc_citi_bike/
-SCRIPT_FILE_NAME=dags/utils/glue_spark_test.py
-
-3.
-docker run -it --rm \
-    -v ~/.aws:/home/hadoop/.aws \
-    -v "$WORKSPACE_LOCATION:/home/hadoop/workspace" \
-    -v "$WORKSPACE_LOCATION/temp:/home/hadoop/temp" \
-    -e AWS_PROFILE=son \
-    --name glue5_spark_submit \
-    public.ecr.aws/glue/aws-glue-libs:5 \
-    spark-submit /home/hadoop/workspace/"$SCRIPT_FILE_NAME"
-
-docker run -it --rm \
-    -v ~/.aws:/home/hadoop/.aws \
-    -v "$WORKSPACE_LOCATION:/home/hadoop/workspace" \
-    -v "$WORKSPACE_LOCATION/temp:/home/hadoop/temp" \
-    -e AWS_PROFILE=son \
-    --name glue5_spark_submit \
-    public.ecr.aws/glue/aws-glue-libs:5 \
-    spark-submit /home/hadoop/workspace/dags/utils/glue_spark.py --job_name my_test_glue_job --s3_input_path s3://nyc-citi-bikes-6dfe261a97b83ccc/raw_zones/year=2025/month=03/ --s3_output_path s3://nyc-citi-bikes-6dfe261a97b83ccc/clean_zones/year=2025/month=03/
+## Project Structure
+```
+root_project/
+│
+├── dags/                      # Airflow DAGs
+├── terraform/                 # Terraform IaC modules
+|   ├── my_glue_job.py         # PySpark scripts for AWS Glue
+├── dbt_athena/               # dbt staging and data martmodels 
+├── analysis/               # data queries and visualizations 
+└── README.md
+```
+## Data Visualization
+![](analysis/tableau_screenshot.png)
+[View the interactive dashboard on Tableau](https://public.tableau.com/views/citibiketwb_2025/Dashboard?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)

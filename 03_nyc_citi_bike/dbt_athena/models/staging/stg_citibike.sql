@@ -5,6 +5,7 @@ SELECT
     EXTRACT(hour FROM started_at) AS started_hour,
     EXTRACT(day FROM ended_at) AS ended_day,
     EXTRACT(hour FROM ended_at) AS ended_hour,
+    EXTRACT(DOW FROM started_at) as dom,
     start_station_name, 
     start_station_id,
     start_lat,
@@ -17,4 +18,3 @@ SELECT
     REPLACE(rideable_type, '_bike', '') AS rideable_type, 
     member_casual
 FROM {{source('raw_data', 'raw_trips')}}
--- WHERE year='2024'

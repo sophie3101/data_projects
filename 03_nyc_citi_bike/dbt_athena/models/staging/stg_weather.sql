@@ -4,4 +4,3 @@ SELECT
     temperature,
     weather
 FROM {{source('raw_data', 'raw_weather')}}
--- WHERE year='2024'

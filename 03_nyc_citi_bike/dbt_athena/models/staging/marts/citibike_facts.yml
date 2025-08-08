@@ -17,3 +17,28 @@ models:
         tests:
            - accepted_values:
               values: ['classic', 'electric']
+      - name: started_day
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                       11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                       21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+      - name: ended_day
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                       11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                       21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+      - name: started_month
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12]
+      - name: ended_month
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12]
+      - name: weekday
+        tests:
+          - accepted_values:
+              values: ['monday', 'tuesday', 'wednesday', 'thursday','friday',
+                      'saturday', 'sunday']

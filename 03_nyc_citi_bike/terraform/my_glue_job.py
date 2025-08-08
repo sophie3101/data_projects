@@ -68,7 +68,7 @@ df = df.withColumn("started_at", sf.to_timestamp(sf.col("started_at"), "yyyy-MM-
 print("size after filter trip with less than a minute: ", df.count())
 
 # filter trip that start and end at same station id
-df=df.filter((sf.col('start_station_id')==sf.col('end_station_id')) & (sf.col('trip_duration')<=600))
+df=df.filter((sf.col('start_station_id')!=sf.col('end_station_id')))
 print("size after filter trip with start and stop at the same station: " ,df.count())
 
 # for member_casual col, if there is null value , fill null
