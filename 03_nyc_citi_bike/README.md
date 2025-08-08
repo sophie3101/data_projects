@@ -35,14 +35,17 @@ Use **Athena** or **Redshift spectrum** for data queries and visualize data usin
 - Tableau Public is installed and ready for use
 
 ### How to run (Step by step)
-#### Provision Infrastructure
+#### 1. Provision Infrastructure
+AWS credentials is saved in terraform/secret.tfvars. 
 ```
-terraform apply
+terraform apply  -var-file="secret.tfvars"
 ```
+AWS resources including an IAM role, S3 bucket, and Redshift cluster are provisioned. The names of these resources are also output for easy reference and can be copied into the `airflow_settings.yaml` file.
 
 #### Start Airflow Scheduler
 
 ``` astro dev start```
+
 Trigger the Pipeline DAG on airflow UI
 ![](analysis/airflow_graph.png)
 
