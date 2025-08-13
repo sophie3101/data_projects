@@ -28,7 +28,7 @@ docker run --name my-postgres \
 
 2a. use `psql` or `pgcli` to interact with the server
 
-to use pgcli: pip install pgcli
+to use pgcli: `pip install pgcli`
 
 to connect
 pgcli -h localhost -p 54334 -U myuser -d mydb

@@ -18,7 +18,10 @@ Use **Airflow** to orchestrate the workflow:
 1. Ingest historical weather data from open-meteo API
 2. Ingest NYC Citi Bike trip data ([src here](https://s3.amazonaws.com/tripdata/index.html)) from year 2020. iThe ingestion can be performed as a full load or incrementally by downloading data from the previous month. 
 3. Uploads extracted data to S3 raw zone
-4. Perform data cleaning and transformation using **PySpark** scripts, orchestrated and executed through **AWS Glue**
+4. Perform data cleaning and transformation using **PySpark** scripts, orchestrated and executed through **AWS Glue**. Data cleaning includes:
+    - convert datetime colume to imestam type
+    - filter out trip less than 5 minutes
+    - filter out trip start and end at same stations
 5. Stores cleaned data as Parquet files in S3 clean zone
 6. Crawls the cleaned data and populates the AWS Glue Data Catalog 
 7. Use **dbt** to create `citibike_facts` table, join nyc citi bike trips with weather data

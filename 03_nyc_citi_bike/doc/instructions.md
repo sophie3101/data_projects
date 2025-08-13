@@ -1,12 +1,10 @@
-set s3 bucket name
-set variable in airflow_settings.yaml
 
-test glue job locally
+# test glue job locally
 https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-libraries.html#develop-local-python
 
 1. docker pull public.ecr.aws/glue/aws-glue-libs:5 
 2. 
-WORKSPACE_LOCATION=/Users/u249637/Documents/Personal/data_projects/03_nyc_citi_bike/
+WORKSPACE_LOCATION=$HOME/data_projects/03_nyc_citi_bike/
 SCRIPT_FILE_NAME=dags/utils/glue_spark_test.py
 
 3.
@@ -28,21 +26,22 @@ docker run -it --rm \
     public.ecr.aws/glue/aws-glue-libs:5 \
     spark-submit /home/hadoop/workspace/terraform/my_glue_job.py --job_name my_test_glue_job --s3_input_path s3://nyc-citi-bikes-6dfe261a97b83ccc/raw_zones/year=2025/month=03/ --s3_output_path s3://nyc-citi-bikes-6dfe261a97b83ccc/clean_zones/year=2025/month=03/
 
-
+# redshift spectrum
 use redshift spectrum because can directly query on s3: https://docs.aws.amazon.com/redshift/latest/dg/c-getting-started-using-spectrum.html
 terraform to create redshfit cluster 
 terraform: store sensitive info on secret.tfvars
 terraform apply  -var-file="secret.tfvars"
 
-go to redshfit query editor v2
-create externa schema (use redhisft query editor v2)
+- go to redshfit query editor v2: 
+```create externa schema (use redhisft query editor v2)
 create external schema citibike_schema 
 from data catalog 
 database 'citibike_db' 
 iam_role 'arn:aws:iam::459266566350:role/createdRedShiftRole-6dfe261a97b83ccc'
 create external database if not exists;
+```
 
-note: i tested and using glue crawler is more efficient because I don't have to add the partition by myself. Glue crawler will handler that
+note: i tested and using glue crawler is more efficient because I don't have to add the partition by myself. Glue crawler will handle that
 
 In redshift, to add partition you have to do each partion manually
 create external table citibike_schema.citibikes_fact_table(
@@ -67,18 +66,16 @@ location 's3://nyc-citi-bikes-6dfe261a97b83ccc/clean_zones/'
 so I instead use aws glue crawler, which is triggered by dag
 create the database and glue crawler via. terraform
 
+
+# dbt
 then use dbt for sematic transformation
 pip install dbt-core dbt-athena
 go to dbt folder: dbt init dbt_athena
+profile is saved in : $HOME/.dbt/profiles.yml
 
-profile is saved in : /Users/u249637/.dbt/profiles.yml
-
-
-#dbt
-prifle.yml
 because astro use docker, it need .profile.yml to be available in the docker container
-so copy to dbt_athena/
-my_dbt_athena:
+so copy to dbt_athena/. Make sure that the profile.yml look like this: 
+```my_dbt_athena:
   target: dev
   outputs:
     dev:
@@ -91,5 +88,5 @@ my_dbt_athena:
       catalog: AwsDataCatalog
       aws_profile_name: son
       threads: 4
-
-dbt debug to check connection
+```
+`dbt debug ` to check connection

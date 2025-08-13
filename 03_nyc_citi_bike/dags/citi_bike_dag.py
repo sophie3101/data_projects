@@ -340,6 +340,7 @@ def citi_bikes_etl():
             # src_ziplinks>>ziplinks_to_process>> extract_n_upload_tasks >>s3_raw_paths >> glue_configs >>glue_jobs >>choose_task >>[skip_task, run_glue_crawler]
             # choose_task >>[skip_task, run_glue_crawler]
             start_transform>>s3_raw_paths>> glue_configs >>glue_jobs >>choose_task >>[skip_task, run_glue_crawler]
+        
         with TaskGroup(group_id="load_task") as load_group_task:
             start_dbt = EmptyOperator(
                 task_id="start_dbt",

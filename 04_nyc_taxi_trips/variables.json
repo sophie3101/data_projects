@@ -1,0 +1,7 @@
+{
+    "s3_bucket_name": "nyc-taxi-81d60579e425d845",
+    "glue_database" : "nyc_taxi_database",
+    "redshift_default_schema": "dev",
+    "redshift_external_schema": "nyc_taxi_schema",
+    "redshift_role": "arn:aws:iam::459266566350:role/createdRedShiftRole-81d60579e425d845"
+}
