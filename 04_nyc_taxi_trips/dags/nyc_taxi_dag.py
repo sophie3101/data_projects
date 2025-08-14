@@ -90,7 +90,7 @@ def nyc_taxi_dag():
         
     @task(task_id='create_external_schema')
     def create_external_schema():
-        # create external schema in dev database of redshift cluster
+        # create external schema in `dev`` database of redshift cluster
         hook = RedshiftSQLHook(redshift_conn_id=REDSHIFT_CONN_ID)
         schema_name= Variable.get("redshift_external_schema")
         glue_database = Variable.get("glue_database")
@@ -120,33 +120,62 @@ def nyc_taxi_dag():
             if not is_table_exists(hook, schema_name, table_name):
                 print("CREATING TABLE ")
                 s3_path_root = s3_paths[0].split("/year")[0]
-                create_stmt = f"""
-                    create external table {schema_name}.{table_name}(     
-                        vendorid INT,
-                        tpep_pickup_datetime TIMESTAMP,
-                        tpep_dropoff_datetime TIMESTAMP,
-                        passenger_count BIGINT,
-                        trip_distance DOUBLE PRECISION,
-                        ratecodeid BIGINT,
-                        store_and_fwd_flag VARCHAR,
-                        pulocationid INT,
-                        dolocationid INT,
-                        payment_type BIGINT,
-                        fare_amount DOUBLE PRECISION,
-                        extra DOUBLE PRECISION,
-                        mta_tax DOUBLE PRECISION,
-                        tip_amount DOUBLE PRECISION,
-                        tolls_amount DOUBLE PRECISION,
-                        improvement_surcharge DOUBLE PRECISION,
-                        total_amount DOUBLE PRECISION,
-                        congestion_surcharge DOUBLE PRECISION,
-                        airport_fee DOUBLE PRECISION,
-                        cbd_congestion_fee DOUBLE PRECISION
-                    )
-                    PARTITIONED BY (year INT, month INT)
-                    STORED AS PARQUET
-                    location '{s3_path_root}';
-                """
+                if taxi_color == "yellow":
+                    create_stmt = f"""
+                        create external table {schema_name}.{table_name}(     
+                            vendorid INT,
+                            tpep_pickup_datetime TIMESTAMP,
+                            tpep_dropoff_datetime TIMESTAMP,
+                            passenger_count BIGINT,
+                            trip_distance DOUBLE PRECISION,
+                            ratecodeid BIGINT,
+                            store_and_fwd_flag VARCHAR,
+                            pulocationid INT,
+                            dolocationid INT,
+                            payment_type BIGINT,
+                            fare_amount DOUBLE PRECISION,
+                            extra DOUBLE PRECISION,
+                            mta_tax DOUBLE PRECISION,
+                            tip_amount DOUBLE PRECISION,
+                            tolls_amount DOUBLE PRECISION,
+                            improvement_surcharge DOUBLE PRECISION,
+                            total_amount DOUBLE PRECISION,
+                            congestion_surcharge DOUBLE PRECISION,
+                            airport_fee DOUBLE PRECISION,
+                            cbd_congestion_fee DOUBLE PRECISION
+                        )
+                        PARTITIONED BY (year INT, month INT)
+                        STORED AS PARQUET
+                        location '{s3_path_root}';
+                    """
+                else:
+                    create_stmt = f"""
+                        create external table {schema_name}.{table_name}(     
+                            vendorid INT,
+                            lpep_pickup_datetime TIMESTAMP,
+                            lpep_dropoff_datetime TIMESTAMP,
+                            passenger_count BIGINT,
+                            trip_distance DOUBLE PRECISION,
+                            ratecodeid BIGINT,
+                            store_and_fwd_flag VARCHAR,
+                            pulocationid INT,
+                            dolocationid INT,
+                            payment_type BIGINT,
+                            fare_amount DOUBLE PRECISION,
+                            extra DOUBLE PRECISION,
+                            mta_tax DOUBLE PRECISION,
+                            tip_amount DOUBLE PRECISION,
+                            tolls_amount DOUBLE PRECISION,
+                            improvement_surcharge DOUBLE PRECISION,
+                            total_amount DOUBLE PRECISION,
+                            congestion_surcharge DOUBLE PRECISION,
+                            airport_fee DOUBLE PRECISION,
+                            cbd_congestion_fee DOUBLE PRECISION
+                        )
+                        PARTITIONED BY (year INT, month INT)
+                        STORED AS PARQUET
+                        location '{s3_path_root}';
+                    """
                 hook.run(sql=create_stmt, autocommit=True)
 
             
