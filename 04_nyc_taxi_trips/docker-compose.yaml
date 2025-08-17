@@ -86,7 +86,8 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
     - ./requirements.txt:/requirements.txt
     - ./variables.json:/opt/airflow/variables.json
-    # - ~/.aws:/root/.aws:ro
+    - ./dbt_taxi_trips:/opt/airflow/dbt_taxi_trips
+    - ~/.aws:/home/airflow/.aws
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on

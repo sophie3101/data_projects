@@ -239,14 +239,17 @@ def nyc_taxi_dag():
 
         green_ingestion_group >> green_raw_load_group
         
-        
+    run_dbt = BashOperator(
+        task_id='run_dbt_athena',
+        bash_command="""
+        cd /opt/airflow/dbt_taxi_trips && \
+        dbt run  --vars '{'is_test_run': 'false'}'
+        """
+            )
+  
     # Define DAG flow
     init = EmptyOperator(task_id="init")
-    init >> [yellow_taxi_group, green_taxi_group] 
-    
-    
-    # """test single task"""
-    # create_or_update_table_task = create_n_update_external_table("yellow")
-    # create_or_update_table_task
+    init >> [yellow_taxi_group, green_taxi_group] >> run_dbt
+  
 
 nyc_taxi_dag()

@@ -1,0 +1,12 @@
+dbt_taxi_trips:
+  outputs:
+    dev:
+      database: AwsDataCatalog
+      region_name: us-east-1
+      s3_data_dir: s3://nyc-taxi-81d60579e425d845/dbt/
+      s3_staging_dir: s3://nyc-taxi-81d60579e425d845/athena_results/
+      schema: dbt_nyc_taxi_database
+      threads: 4
+      type: athena
+      aws_profile_name: son
+  target: dev
