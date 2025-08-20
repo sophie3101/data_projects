@@ -2,7 +2,7 @@ terraform: `terraform apply -var-file="secret.tfvars" `
 curl -LfO 'https://airflow.apache.org/docs/apache-airflow/3.0.4/docker-compose.yaml'
 `echo -e "AIRFLOW_UID=$(id -u)" >> .env`
 `docker build .` : # to install aws services for airflow
-docker compose down --volumes
+`docker compose down --volumes`
 `docker-compose build` 
 Initialize the Airflow scheduler, DB, and other config: `docker-compose up airflow-init`
 Kick up the all the services from the container: `docker-compose up -d`
@@ -61,3 +61,11 @@ dbt_taxi_trips:
   target: dev
 
 4. download zones look up table and put in seeds folder
+
+# spark
+-- running spark using jupyter notebook:
+    docker run -it --rm -p 8888:8888 jupyter/pyspark-notebook
+if u want to save the script
+    docker run -it --rm -p 8888:8888 -v $PWD:/home/jovyan/work jupyter/pyspark-notebook
+
+# streaming
