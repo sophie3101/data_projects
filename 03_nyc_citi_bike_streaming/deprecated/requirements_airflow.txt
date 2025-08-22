@@ -1,0 +1,5 @@
+apache-airflow-providers-amazon
+apache-airflow-providers-postgres
+apache-airflow-providers-apache-flink
+kafka-python
+confluent-kafka

@@ -251,5 +251,4 @@ def nyc_taxi_dag():
     init = EmptyOperator(task_id="init")
     init >> [yellow_taxi_group, green_taxi_group] >> run_dbt
   
-
 nyc_taxi_dag()
