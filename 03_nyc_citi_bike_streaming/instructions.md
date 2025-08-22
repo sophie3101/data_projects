@@ -47,15 +47,22 @@ ROW_NUMBER()OVER(PARTITION BY station_id ORDER BY event_time DESC ) AS rnk
 FROM station_status
 )
 
-#totaol dock available
+#total dock available
 SELECT SUM(num_docks_available)
 FROM cte
 JOIN station_info 
 	ON station_info.station_id = cte.station_id 
 WHERE cte.rnk =1
-# total bik available
+#total bike available
 SELECT station_info.name, station_info.longitude, station_info.latitude, cte.num_bikes_available
 FROM cte
 JOIN station_info 
 	ON station_info.station_id = cte.station_id 
 WHERE cte.rnk =1
+#show current station with available bike
+SELECT station_info.name, station_info.longitude, station_info.latitude, cte.num_bikes_available
+FROM cte
+JOIN station_info 
+	ON station_info.station_id = cte.station_id 
+WHERE cte.rnk =1
+ORDER BY num_bikes_available DESC
