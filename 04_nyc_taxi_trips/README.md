@@ -1,71 +1,41 @@
-terraform: `terraform apply -var-file="secret.tfvars" `
-curl -LfO 'https://airflow.apache.org/docs/apache-airflow/3.0.4/docker-compose.yaml'
-`echo -e "AIRFLOW_UID=$(id -u)" >> .env`
-`docker build .` : # to install aws services for airflow
-`docker compose down --volumes`
-`docker-compose build` 
+# NYC taxi city - Data Engineer approach
+This project is a modern data pipeline built to ingest, transform, store, and analyze NYC taxi data. It leverages modern data engineering tools including Apache Airflow, Terraform, AWS Glue, Amazon S3, Redshift, dbt for end-to-end orchestration, data transformation and warehousing.
+
+## Workflow Summary
+
+### 1. Use **Terraform** to set up infrastucture
+Deploy infrastructure with Terraform using secrets:
+
+`terraform apply -var-file="secret.tfvars" `
+
+This command will spin following AWS services:
+- Amazon S3 bucket
+- IAM roles and policies
+- Redshift cluster
+- AWS Glue  catalog
+
+### 2. Airflow Setup
+
+- download Airflow Docker Compose: 
+
+  ```curl -LfO 'https://airflow.apache.org/docs/apache-airflow/3.0.4/docker-compose.yaml'```
+
+- prepare Environment
+
+  ```echo -e "AIRFLOW_UID=$(id -u)" >> .env```
+
+- build Docker services: 
+
+  ```
+    docker-compose up airflow-init #Initialize the Airflow scheduler, DB, and other config
+
+    docker-compose up -d   #Kick up the all the services from the container
+  ``` 
+
 Initialize the Airflow scheduler, DB, and other config: `docker-compose up airflow-init`
-Kick up the all the services from the container: `docker-compose up -d`
-to go inside the docker contaienr: docker-compose exec 
 
-username and password use default(airflow)
 
-how to set variable
-1. either using UI
-2. docker-compose exec airflow-scheduler airflow variables set my_var "my_value"
-OR `docker-compose exec -it airflow-scheduler airflow variables import variables.json`
-confirm:  docker-compose exec -it airflow-scheduler airflow variables list
-Note: all components (scheduler, workers, webserver) can access those variables because they pull them from the shared metadata database. so
-setting in airflow-webserver is sufficient
-3. at beginning, in docker-compose.yml, in airflow init service:     `airflow variables import variables.json `
+### 3. DBT
 
-to create aws connection: airflow connections add aws_default \
-          --conn-type aws \
-          --conn-extra '{"region_name": "${AWS_DEFAULT_REGION}"}'
+create a fact table that includes trip info plus the pickup and dropoff zone names.
 
-verify: docker-compose exec -it airflow-scheduler bash airflow connections list
-4. how to set up redhisft connection on UI: https://www.astronomer.io/docs/learn/connections/redshift/
-or use the command
-airflow connections add redshift_default --conn-uri "aws://<your_aws_access_key_id>:<your_aws_secret_access_key>@<your_redshift_endpoint>:5439/<your_redshift_database>"
-`docker-compose exec -it airflow-scheduler  airflow connections list`
-airflow connections get postgres_conn --output json
-4. i use redshfit spectrum not redshift so I need to create external schema
-the redshift cluster need to be publically available so i can connect from my laptop locally
-this create extera schema in database 'dev'
-create external schema myspectrum_schema 
-from data catalog 
-database 'nyc_taxi_database' 
-iam_role 'arn:aws:iam::459266566350:role/createdRedShiftRole-81d60579e425d845'
-create external database if not exists;
-
-# DBT
-1. install dbt:pip install dbt-core dbt-athena
-2. dbt init dbt_taxi_trips
-
-profile is in:
-/Users/u249637/.dbt/profiles.yml
-
-3. dbt debug to check connection
-
-dbt_taxi_trips:
-  outputs:
-    dev:
-      database: AwsDataCatalog
-      region_name: us-east-1
-      s3_data_dir: s3://nyc-taxi-81d60579e425d845/dbt/
-      s3_staging_dir: s3://nyc-taxi-81d60579e425d845/athena_results/
-      schema: dbt_nyc_taxi_database
-      threads: 4
-      type: athena
-      aws_profile_name: son
-  target: dev
-
-4. download zones look up table and put in seeds folder
-
-# spark
--- running spark using jupyter notebook:
-    docker run -it --rm -p 8888:8888 jupyter/pyspark-notebook
-if u want to save the script
-    docker run -it --rm -p 8888:8888 -v $PWD:/home/jovyan/work jupyter/pyspark-notebook
-
-# streaming
